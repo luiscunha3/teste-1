@@ -1,33 +1,52 @@
 import { z } from "zod";
 
-export const mudancaCreateSchema = z.object({
-  enderecoOrigem: z.string().min(5, "Endereço de origem é obrigatório"),
-  enderecoDestino: z.string().min(5, "Endereço de destino é obrigatório"),
-  dataDesejada: z.string().datetime().optional(),
+export const obraCreateSchema = z.object({
+  nome: z.string().min(3, "Nome da obra é obrigatório"),
+  endereco: z.string().min(5, "Endereço é obrigatório"),
+  cidade: z.string().min(2, "Cidade é obrigatória"),
+  estado: z.string().length(2, "Use a sigla do estado (ex: SP)"),
+  areaM2: z.number().positive().optional(),
+  orcamentoCentavos: z.number().int().nonnegative().optional(),
+  dataInicio: z.string().datetime().optional(),
+  dataPrevisaoFim: z.string().datetime().optional(),
 });
 
-export const cargaItemSchema = z.object({
-  itemId: z.string().cuid(),
-  x: z.number(),
-  y: z.number(),
-  rotacao: z.number().default(0),
+export const etapaCreateSchema = z.object({
+  obraId: z.string().cuid(),
+  nome: z.string().min(2, "Nome da etapa é obrigatório"),
+  descricao: z.string().optional(),
+  ordem: z.number().int().nonnegative(),
+  dataInicio: z.string().datetime().optional(),
+  dataPrevisaoFim: z.string().datetime().optional(),
 });
 
-export const cargaLayoutSchema = z.object({
-  mudancaId: z.string().cuid(),
-  caminhaoId: z.string().cuid(),
-  itens: z.array(cargaItemSchema),
+export const materialCreateSchema = z.object({
+  nome: z.string().min(2, "Nome do material é obrigatório"),
+  categoria: z.enum([
+    "CIMENTO",
+    "AREIA",
+    "BRITA",
+    "TIJOLO",
+    "FERRO",
+    "MADEIRA",
+    "ELETRICA",
+    "HIDRAULICA",
+    "ACABAMENTO",
+    "OUTROS",
+  ]),
+  unidade: z.string().min(1),
+  precoUnitarioCentavos: z.number().int().nonnegative().optional(),
 });
 
-export const cotacaoFilterSchema = z.object({
-  precoMin: z.number().optional(),
-  precoMax: z.number().optional(),
-  notaMinima: z.number().min(0).max(5).optional(),
-  seguroIncluso: z.boolean().optional(),
-  tipoCaminhao: z.string().optional(),
-  ordenarPor: z.enum(["preco", "nota", "data"]).default("preco"),
+export const trabalhadorCreateSchema = z.object({
+  nome: z.string().min(3, "Nome é obrigatório"),
+  funcao: z.string().min(3, "Função é obrigatória"),
+  telefone: z.string().optional(),
+  email: z.string().email().optional(),
+  valorDiaCentavos: z.number().int().nonnegative().optional(),
 });
 
-export type MudancaCreateInput = z.infer<typeof mudancaCreateSchema>;
-export type CargaLayoutInput = z.infer<typeof cargaLayoutSchema>;
-export type CotacaoFilterInput = z.infer<typeof cotacaoFilterSchema>;
+export type ObraCreateInput = z.infer<typeof obraCreateSchema>;
+export type EtapaCreateInput = z.infer<typeof etapaCreateSchema>;
+export type MaterialCreateInput = z.infer<typeof materialCreateSchema>;
+export type TrabalhadorCreateInput = z.infer<typeof trabalhadorCreateSchema>;

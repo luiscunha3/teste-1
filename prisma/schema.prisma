@@ -13,12 +13,32 @@ enum Plan {
   PRO
 }
 
-enum MudancaStatus {
-  RASCUNHO
-  COTANDO
-  CONFIRMADA
+enum ObraStatus {
+  PLANEJAMENTO
+  EM_ANDAMENTO
+  PAUSADA
   CONCLUIDA
   CANCELADA
+}
+
+enum EtapaStatus {
+  PENDENTE
+  EM_ANDAMENTO
+  CONCLUIDA
+  ATRASADA
+}
+
+enum MaterialCategoria {
+  CIMENTO
+  AREIA
+  BRITA
+  TIJOLO
+  FERRO
+  MADEIRA
+  ELETRICA
+  HIDRAULICA
+  ACABAMENTO
+  OUTROS
 }
 
 // ─── Auth.js Models ───────────────────────────────────────
@@ -40,7 +60,7 @@ model User {
 
   accounts  Account[]
   sessions  Session[]
-  mudancas  Mudanca[]
+  obras     Obra[]
 }
 
 model Account {
@@ -79,101 +99,93 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// ─── Product Models ───────────────────────────────────────
+// ─── Construção Civil Models ─────────────────────────────
 
-model Item {
-  id              String  @id @default(cuid())
-  nome            String
-  categoria       String  // quarto, cozinha, sala, escritorio, caixas
-  iconeUrl        String?
-  larguraCm       Float
-  alturaCm        Float
-  profundidadeCm  Float
-  pesoKg          Float
-  volumeM3        Float
-
-  cargaItens CargaItem[]
-}
-
-model Caminhao {
-  id              String  @id @default(cuid())
-  nome            String
-  tipo            String  // fiorino, hr, tresQuartos, bau
-  capacidadeM3    Float
-  capacidadeKg    Float
-  comprimentoCm   Float
-  larguraCm       Float
-  alturaCm        Float
-  imagemUrl       String?
-
-  mudancas     Mudanca[]
-  cargaLayouts CargaLayout[]
-}
-
-model Transportadora {
-  id               String   @id @default(cuid())
-  nome             String
-  logoUrl          String?
-  notaMedia        Float    @default(0)
-  totalAvaliacoes  Int      @default(0)
-  cidade           String
-  tiposCaminhao    String[] // array de tipos suportados
-
-  cotacoes Cotacao[]
-}
-
-model Mudanca {
-  id              String         @id @default(cuid())
+model Obra {
+  id              String      @id @default(cuid())
   userId          String
-  enderecoOrigem  String
-  enderecoDestino String
-  dataDesejada    DateTime?
-  caminhaoId      String?
-  status          MudancaStatus  @default(RASCUNHO)
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  nome            String
+  descricao       String?
+  endereco        String
+  cidade          String
+  estado          String
+  areaM2          Float?
+  orcamentoCentavos Int      @default(0)
+  gastoCentavos   Int         @default(0)
+  status          ObraStatus  @default(PLANEJAMENTO)
+  dataInicio      DateTime?
+  dataPrevisaoFim DateTime?
+  dataConclusao   DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
 
   user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  caminhao    Caminhao?     @relation(fields: [caminhaoId], references: [id])
-  cotacoes    Cotacao[]
-  cargaLayout CargaLayout?
+  etapas      Etapa[]
+  materiais   ObraMaterial[]
+  equipes     ObraEquipe[]
 }
 
-model Cotacao {
-  id                String    @id @default(cuid())
-  mudancaId         String
-  transportadoraId  String
-  precoCentavos     Int
-  dataDisponivel    DateTime
-  seguroIncluso     Boolean   @default(false)
-  validade          DateTime
-  createdAt         DateTime  @default(now())
+model Etapa {
+  id              String       @id @default(cuid())
+  obraId          String
+  nome            String
+  descricao       String?
+  ordem           Int
+  status          EtapaStatus  @default(PENDENTE)
+  progresso       Float        @default(0)
+  dataInicio      DateTime?
+  dataPrevisaoFim DateTime?
+  dataConclusao   DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
 
-  mudanca       Mudanca       @relation(fields: [mudancaId], references: [id], onDelete: Cascade)
-  transportadora Transportadora @relation(fields: [transportadoraId], references: [id])
+  obra Obra @relation(fields: [obraId], references: [id], onDelete: Cascade)
 }
 
-model CargaLayout {
-  id                  String      @id @default(cuid())
-  mudancaId           String      @unique
-  caminhaoId          String
-  ocupacaoPercentual  Float       @default(0)
-  createdAt           DateTime    @default(now())
-  updatedAt           DateTime    @updatedAt
+model Material {
+  id          String             @id @default(cuid())
+  nome        String
+  categoria   MaterialCategoria
+  unidade     String             // kg, m3, unidade, saco, metro
+  precoUnitarioCentavos Int      @default(0)
+  descricao   String?
 
-  mudanca  Mudanca    @relation(fields: [mudancaId], references: [id], onDelete: Cascade)
-  caminhao Caminhao   @relation(fields: [caminhaoId], references: [id])
-  itens    CargaItem[]
+  obraMateriais ObraMaterial[]
 }
 
-model CargaItem {
-  id           String  @id @default(cuid())
-  cargaLayoutId String
-  itemId       String
-  x            Float
-  y            Float
-  rotacao      Float   @default(0)
+model ObraMaterial {
+  id              String   @id @default(cuid())
+  obraId          String
+  materialId      String
+  quantidade      Float
+  quantidadeUsada Float    @default(0)
+  custoCentavos   Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  cargaLayout CargaLayout @relation(fields: [cargaLayoutId], references: [id], onDelete: Cascade)
-  item        Item        @relation(fields: [itemId], references: [id])
+  obra     Obra     @relation(fields: [obraId], references: [id], onDelete: Cascade)
+  material Material @relation(fields: [materialId], references: [id])
+}
+
+model Trabalhador {
+  id        String   @id @default(cuid())
+  nome      String
+  funcao    String   // pedreiro, eletricista, encanador, mestre de obras, servente
+  telefone  String?
+  email     String?
+  valorDiaCentavos Int @default(0)
+  createdAt DateTime @default(now())
+
+  equipes ObraEquipe[]
+}
+
+model ObraEquipe {
+  id             String    @id @default(cuid())
+  obraId         String
+  trabalhadorId  String
+  dataEntrada    DateTime  @default(now())
+  dataSaida      DateTime?
+
+  obra        Obra        @relation(fields: [obraId], references: [id], onDelete: Cascade)
+  trabalhador Trabalhador @relation(fields: [trabalhadorId], references: [id])
 }

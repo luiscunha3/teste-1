@@ -28,22 +28,25 @@ export function daysLeftInTrial(user: Pick<User, "trialEndsAt">): number {
 
 export const PLAN_LIMITS = {
   FREE: {
-    mudancasAtivas: 1,
-    itensNoCanvas: 15,
-    cotacoesPorMudanca: 3,
-    filtrosAvancados: false,
+    obrasAtivas: 1,
+    etapasPorObra: 10,
+    materiaisPorObra: 20,
+    trabalhadoresPorObra: 5,
+    relatoriosAvancados: false,
   },
   TRIAL: {
-    mudancasAtivas: Infinity,
-    itensNoCanvas: Infinity,
-    cotacoesPorMudanca: Infinity,
-    filtrosAvancados: true,
+    obrasAtivas: Infinity,
+    etapasPorObra: Infinity,
+    materiaisPorObra: Infinity,
+    trabalhadoresPorObra: Infinity,
+    relatoriosAvancados: true,
   },
   PRO: {
-    mudancasAtivas: Infinity,
-    itensNoCanvas: Infinity,
-    cotacoesPorMudanca: Infinity,
-    filtrosAvancados: true,
+    obrasAtivas: Infinity,
+    etapasPorObra: Infinity,
+    materiaisPorObra: Infinity,
+    trabalhadoresPorObra: Infinity,
+    relatoriosAvancados: true,
   },
 } as const;
 

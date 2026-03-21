@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { mudancaCreateSchema } from "@/lib/validations";
+import { obraCreateSchema } from "@/lib/validations";
 import { checkUsageLimit } from "@/lib/subscription";
 import type { Plan } from "@prisma/client";
 
@@ -11,13 +11,16 @@ export async function GET() {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
 
-  const mudancas = await db.mudanca.findMany({
+  const obras = await db.obra.findMany({
     where: { userId: session.user.id },
-    include: { caminhao: true, cargaLayout: true, _count: { select: { cotacoes: true } } },
+    include: {
+      etapas: { orderBy: { ordem: "asc" } },
+      _count: { select: { materiais: true, equipes: true } },
+    },
     orderBy: { updatedAt: "desc" },
   });
 
-  return NextResponse.json(mudancas);
+  return NextResponse.json(obras);
 }
 
 export async function POST(req: Request) {
@@ -31,36 +34,40 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Usuário não encontrado" }, { status: 404 });
   }
 
-  // Check plan limits
-  const activeMudancas = await db.mudanca.count({
+  const activeObras = await db.obra.count({
     where: {
       userId: session.user.id,
       status: { notIn: ["CONCLUIDA", "CANCELADA"] },
     },
   });
 
-  const { allowed } = checkUsageLimit(user.plan as Plan, "mudancasAtivas", activeMudancas);
+  const { allowed } = checkUsageLimit(user.plan as Plan, "obrasAtivas", activeObras);
   if (!allowed) {
     return NextResponse.json(
-      { error: "Limite de mudanças ativas atingido. Faça upgrade para PRO." },
+      { error: "Limite de obras ativas atingido. Faça upgrade para PRO." },
       { status: 403 }
     );
   }
 
   const body = await req.json();
-  const parsed = mudancaCreateSchema.safeParse(body);
+  const parsed = obraCreateSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  const mudanca = await db.mudanca.create({
+  const obra = await db.obra.create({
     data: {
       userId: session.user.id,
-      enderecoOrigem: parsed.data.enderecoOrigem,
-      enderecoDestino: parsed.data.enderecoDestino,
-      dataDesejada: parsed.data.dataDesejada ? new Date(parsed.data.dataDesejada) : null,
+      nome: parsed.data.nome,
+      endereco: parsed.data.endereco,
+      cidade: parsed.data.cidade,
+      estado: parsed.data.estado,
+      areaM2: parsed.data.areaM2 ?? null,
+      orcamentoCentavos: parsed.data.orcamentoCentavos ?? 0,
+      dataInicio: parsed.data.dataInicio ? new Date(parsed.data.dataInicio) : null,
+      dataPrevisaoFim: parsed.data.dataPrevisaoFim ? new Date(parsed.data.dataPrevisaoFim) : null,
     },
   });
 
-  return NextResponse.json(mudanca, { status: 201 });
+  return NextResponse.json(obra, { status: 201 });
 }

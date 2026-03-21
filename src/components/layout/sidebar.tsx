@@ -3,11 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Package, FileText, Settings, Truck } from "lucide-react";
+import { LayoutDashboard, HardHat, Package, Users, Settings } from "lucide-react";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/app/mudanca", label: "Minhas Mudanças", icon: Package },
+  { href: "/app/obras", label: "Minhas Obras", icon: HardHat },
+  { href: "/app/materiais", label: "Materiais", icon: Package },
+  { href: "/app/equipe", label: "Equipe", icon: Users },
   { href: "/settings/billing", label: "Configurações", icon: Settings },
 ];
 
@@ -17,8 +19,8 @@ export function Sidebar() {
   return (
     <aside className="hidden md:flex w-64 flex-col border-r bg-card min-h-[calc(100vh-3.5rem)]">
       <div className="flex items-center gap-2 px-6 py-4 border-b">
-        <Truck className="h-5 w-5 text-primary" />
-        <span className="font-semibold">MudaFácil</span>
+        <HardHat className="h-5 w-5 text-primary" />
+        <span className="font-semibold">Construção Civil</span>
       </div>
       <nav className="flex-1 px-3 py-4 space-y-1">
         {navItems.map((item) => (

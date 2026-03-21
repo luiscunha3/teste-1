@@ -5,38 +5,40 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Package, Truck, FileText } from "lucide-react";
+import { Plus, HardHat, Users, Package } from "lucide-react";
 import { formatDate } from "@/lib/utils";
 
 export default async function DashboardPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
-  const mudancas = await db.mudanca.findMany({
+  const obras = await db.obra.findMany({
     where: { userId: session.user.id },
-    include: { caminhao: true, _count: { select: { cotacoes: true } } },
+    include: {
+      _count: { select: { etapas: true, materiais: true, equipes: true } },
+    },
     orderBy: { updatedAt: "desc" },
     take: 10,
   });
 
   const stats = {
-    total: mudancas.length,
-    ativas: mudancas.filter((m) => !["CONCLUIDA", "CANCELADA"].includes(m.status)).length,
-    cotacoes: mudancas.reduce((acc, m) => acc + m._count.cotacoes, 0),
+    total: obras.length,
+    ativas: obras.filter((o) => !["CONCLUIDA", "CANCELADA"].includes(o.status)).length,
+    equipes: obras.reduce((acc, o) => acc + o._count.equipes, 0),
   };
 
   const statusLabels: Record<string, string> = {
-    RASCUNHO: "Rascunho",
-    COTANDO: "Cotando",
-    CONFIRMADA: "Confirmada",
+    PLANEJAMENTO: "Planejamento",
+    EM_ANDAMENTO: "Em Andamento",
+    PAUSADA: "Pausada",
     CONCLUIDA: "Concluída",
     CANCELADA: "Cancelada",
   };
 
   const statusVariant: Record<string, "default" | "secondary" | "success" | "destructive" | "warning" | "outline"> = {
-    RASCUNHO: "outline",
-    COTANDO: "warning",
-    CONFIRMADA: "default",
+    PLANEJAMENTO: "outline",
+    EM_ANDAMENTO: "warning",
+    PAUSADA: "secondary",
     CONCLUIDA: "success",
     CANCELADA: "destructive",
   };
@@ -51,9 +53,9 @@ export default async function DashboardPage() {
           </p>
         </div>
         <Button asChild>
-          <Link href="/app/mudanca">
+          <Link href="/app/obras">
             <Plus className="h-4 w-4 mr-2" />
-            Nova Mudança
+            Nova Obra
           </Link>
         </Button>
       </div>
@@ -61,28 +63,28 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Total de Mudanças</CardDescription>
+            <CardDescription>Total de Obras</CardDescription>
             <CardTitle className="text-3xl flex items-center gap-2">
-              <Package className="h-5 w-5 text-primary" />
+              <HardHat className="h-5 w-5 text-primary" />
               {stats.total}
             </CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Mudanças Ativas</CardDescription>
+            <CardDescription>Obras Ativas</CardDescription>
             <CardTitle className="text-3xl flex items-center gap-2">
-              <Truck className="h-5 w-5 text-accent" />
+              <Package className="h-5 w-5 text-accent" />
               {stats.ativas}
             </CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>Cotações Recebidas</CardDescription>
+            <CardDescription>Trabalhadores Alocados</CardDescription>
             <CardTitle className="text-3xl flex items-center gap-2">
-              <FileText className="h-5 w-5 text-success" />
-              {stats.cotacoes}
+              <Users className="h-5 w-5 text-success" />
+              {stats.equipes}
             </CardTitle>
           </CardHeader>
         </Card>
@@ -90,37 +92,36 @@ export default async function DashboardPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Suas Mudanças</CardTitle>
-          <CardDescription>Gerencie suas mudanças em andamento</CardDescription>
+          <CardTitle>Suas Obras</CardTitle>
+          <CardDescription>Gerencie suas obras em andamento</CardDescription>
         </CardHeader>
         <CardContent>
-          {mudancas.length === 0 ? (
+          {obras.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              <Package className="mx-auto h-12 w-12 mb-4 opacity-50" />
-              <p>Nenhuma mudança ainda.</p>
+              <HardHat className="mx-auto h-12 w-12 mb-4 opacity-50" />
+              <p>Nenhuma obra cadastrada ainda.</p>
               <Button asChild variant="link" className="mt-2">
-                <Link href="/app/mudanca">Criar sua primeira mudança</Link>
+                <Link href="/app/obras">Criar sua primeira obra</Link>
               </Button>
             </div>
           ) : (
             <div className="space-y-3">
-              {mudancas.map((m) => (
+              {obras.map((o) => (
                 <Link
-                  key={m.id}
-                  href={`/app/mudanca?id=${m.id}`}
+                  key={o.id}
+                  href={`/app/obras?id=${o.id}`}
                   className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted transition-colors"
                 >
                   <div className="space-y-1">
-                    <p className="font-medium text-sm">
-                      {m.enderecoOrigem} → {m.enderecoDestino}
-                    </p>
+                    <p className="font-medium text-sm">{o.nome}</p>
                     <p className="text-xs text-muted-foreground">
-                      {m.dataDesejada ? formatDate(m.dataDesejada) : "Sem data"} ·{" "}
-                      {m._count.cotacoes} cotações
+                      {o.cidade}, {o.estado} ·{" "}
+                      {o.dataInicio ? formatDate(o.dataInicio) : "Sem data de início"} ·{" "}
+                      {o._count.etapas} etapas · {o._count.equipes} trabalhadores
                     </p>
                   </div>
-                  <Badge variant={statusVariant[m.status]}>
-                    {statusLabels[m.status]}
+                  <Badge variant={statusVariant[o.status]}>
+                    {statusLabels[o.status]}
                   </Badge>
                 </Link>
               ))}

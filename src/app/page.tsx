@@ -4,9 +4,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Navbar } from "@/components/layout/navbar";
 import {
-  Truck,
-  GripVertical,
-  Filter,
+  HardHat,
+  BarChart3,
+  Users,
   Package,
   ClipboardList,
   ArrowRight,
@@ -15,34 +15,34 @@ import {
 
 const features = [
   {
-    icon: GripVertical,
-    title: "Canvas de Carga Interativo",
+    icon: HardHat,
+    title: "Gestão de Obras",
     description:
-      "Arraste ícones de móveis para dentro de um container virtual. Cada item tem dimensão proporcional real e encaixa visualmente no espaço disponível.",
+      "Cadastre e acompanhe todas as suas obras em um só lugar. Controle status, prazos e progresso de cada etapa.",
   },
   {
-    icon: Truck,
-    title: "Seletor de Caminhão",
+    icon: BarChart3,
+    title: "Orçamentos Detalhados",
     description:
-      "Compare visualmente 4 tamanhos (Fiorino, HR, 3/4, Baú) com barra de ocupação em tempo real conforme você adiciona itens.",
-  },
-  {
-    icon: Filter,
-    title: "Filtros de Cotação",
-    description:
-      "Filtre transportadoras por preço, nota, data disponível, seguro incluso e tipo de veículo. Ordene e compare lado a lado.",
+      "Crie orçamentos completos por obra com controle de gastos em tempo real. Saiba exatamente quanto já foi gasto e quanto falta.",
   },
   {
     icon: Package,
-    title: "Catálogo Visual de Itens",
+    title: "Controle de Materiais",
     description:
-      "Biblioteca com 40+ ícones categorizados (quarto, cozinha, sala, escritório, caixas) com peso e volume pré-estimados.",
+      "Gerencie o estoque de materiais por obra. Acompanhe quantidades compradas, utilizadas e calcule custos automaticamente.",
+  },
+  {
+    icon: Users,
+    title: "Gestão de Equipes",
+    description:
+      "Cadastre trabalhadores, atribua a obras e controle a mão de obra. Acompanhe pedreiros, eletricistas, encanadores e mais.",
   },
   {
     icon: ClipboardList,
-    title: "Resumo Inteligente da Carga",
+    title: "Cronograma de Etapas",
     description:
-      "Painel lateral com volume total (m³), peso estimado, percentual de ocupação e alerta se estiver acima da capacidade.",
+      "Planeje e acompanhe cada etapa da obra: fundação, alvenaria, elétrica, hidráulica, acabamento e mais.",
   },
 ];
 
@@ -57,13 +57,12 @@ export default function LandingPage() {
           14 dias grátis — sem cartão de crédito
         </Badge>
         <h1 className="text-4xl md:text-6xl font-bold tracking-tight max-w-4xl mx-auto leading-tight">
-          Arraste seus móveis, escolha o caminhão e{" "}
-          <span className="text-primary">mude sem estresse</span>
+          Gerencie suas obras com{" "}
+          <span className="text-primary">controle total</span>
         </h1>
         <p className="mt-6 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-          Monte visualmente a carga da sua mudança com drag & drop, compare
-          tamanhos de caminhão em tempo real e receba cotações instantâneas de
-          transportadoras avaliadas.
+          Controle orçamentos, materiais, equipes e cronogramas de todas as suas
+          obras de construção civil em uma plataforma simples e intuitiva.
         </p>
         <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center">
           <Button size="lg" asChild>
@@ -83,7 +82,7 @@ export default function LandingPage() {
         <div className="text-center mb-16">
           <Badge variant="secondary" className="mb-4">Funcionalidades</Badge>
           <h2 className="text-3xl md:text-4xl font-bold">
-            Tudo que você precisa para planejar sua mudança
+            Tudo que você precisa para gerenciar suas obras
           </h2>
         </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -114,15 +113,15 @@ export default function LandingPage() {
             <CardContent className="p-8 text-center space-y-4">
               <Badge>PRO</Badge>
               <div>
-                <span className="text-5xl font-bold">R$ 29,90</span>
+                <span className="text-5xl font-bold">R$ 49,90</span>
                 <span className="text-muted-foreground">/mês</span>
               </div>
               <ul className="space-y-2 text-sm text-left">
                 {[
-                  "Mudanças ilimitadas",
-                  "Itens ilimitados no canvas",
-                  "Cotações ilimitadas",
-                  "Filtros avançados",
+                  "Obras ilimitadas",
+                  "Controle de materiais completo",
+                  "Gestão de equipes ilimitada",
+                  "Relatórios avançados",
                   "Suporte prioritário",
                 ].map((f) => (
                   <li key={f} className="flex items-center gap-2">
@@ -142,10 +141,10 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="container py-12 text-center text-sm text-muted-foreground border-t mt-20">
         <div className="flex items-center justify-center gap-2 mb-4">
-          <Truck className="h-5 w-5 text-primary" />
-          <span className="font-semibold text-foreground">MudaFácil</span>
+          <HardHat className="h-5 w-5 text-primary" />
+          <span className="font-semibold text-foreground">Construção Civil</span>
         </div>
-        <p>&copy; {new Date().getFullYear()} MudaFácil. Todos os direitos reservados.</p>
+        <p>&copy; {new Date().getFullYear()} Construção Civil. Todos os direitos reservados.</p>
       </footer>
     </div>
   );
